@@ -1,0 +1,66 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.player {
+    display: flex;
+    align-items: center;
+    background: #e7e6f0;
+    border-radius: 30px;
+    padding: 10px 20px;
+    gap: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    color: #2c2c2c;
+}
+
+.play-icon {
+    font-size: 20px;
+    color: #2c2c2c;
+}
+
+.progress-container {
+    position: relative;
+    width: 120px;
+    height: 6px;
+    background: #dcdbe3;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    position: absolute;
+    height: 100%;
+    width: 0%;
+    background: #1f1b42;
+    transition: width 0.8s ease;
+}
+
+.colon {
+    font-size: large;
+    font-weight: 600;
+    color: #2c2c2c;
+}
+
+.info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #2c2c2c;
+    white-space: nowrap;
+}
+
+.track {
+    font-weight: 600;
+}
+
+.separator {
+    opacity: 0.4;
+}

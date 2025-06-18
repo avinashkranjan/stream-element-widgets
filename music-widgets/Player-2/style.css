@@ -1,0 +1,76 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.player {
+    display: flex;
+    align-items: center;
+    background: #e7e6f0;
+    border-radius: 10px;
+    padding-right: 30px;
+    gap: 12px;
+    color: #2c2c2c;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.cover {
+    width: 72px;
+    height: 72px;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.play-icon {
+    font-size: 24px;
+    color: #1f1b42;
+}
+
+.info-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 200px;
+}
+
+.info {
+    display: flex;
+    gap: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #1f1b42;
+}
+
+.track {
+    font-weight: 600;
+}
+
+.dot {
+    color: #999;
+}
+
+.artist {
+    opacity: 0.8;
+}
+
+.progress-wrapper {
+    margin-top: 6px;
+    background: #f4f3f8;
+    border-radius: 4px;
+    height: 6px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(to right, #1f1b42, #f5eeb2);
+    transition: width 0.8s ease;
+}

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Curved Music Widget</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="widget">
+    <img id="cover" class="cover" src="" alt="Album Art" />
+
+    <!-- Gradient Overlay -->
+    <div class="overlay"></div>
+
+    <!-- Progress Arc -->
+    <svg class="arc-bar" viewBox="0 0 300 150">
+      <!-- Full white base arc -->
+      <path d="M 30 130 Q 150 20 270 130" stroke="#ffffff" stroke-width="4" stroke-linecap="round" fill="none" />
+      <!-- Yellow foreground progress -->
+      <path id="progress-bar" d="M 30 130 Q 150 20 270 130" stroke="#f6c96b" stroke-width="4" stroke-linecap="round" fill="none" stroke-dasharray="420" stroke-dashoffset="420" />
+      <!-- Knob -->
+      <circle id="progress-knob" cx="30" cy="130" r="6" fill="#f6c96b" />
+    </svg>
+
+    <!-- Time -->
+    <div class="time-container">
+      <span id="current-time">0:00</span>
+      <span id="total-time">3:40</span>
+    </div>
+
+    <!-- Info -->
+    <div class="info">
+      <div class="track" id="track">Track Title</div>
+      <div class="artist" id="artist">Artist Name</div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
