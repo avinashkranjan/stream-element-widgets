@@ -13,7 +13,6 @@ function fetchSnipData() {
     .then((data) => {
       console.log(data);
       const line = data.trim();
-      console.log("Line from Snip.txt:", line);
       const match = line.match(/“(.+?)”\s*―\s*(.+?)(?:,\s*(.+))?$/);
 
       if (match) {
