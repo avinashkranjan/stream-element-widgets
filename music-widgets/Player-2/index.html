@@ -1,34 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
+    <title>Now Playing Widget</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
-  <title>Now Playing Widget</title>
-</head>
-
-<body>
-  <div class="player">
-    <!-- <img id="cover" crossorigin="anonymous"  class="cover" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS52kF2ECdV4gEekAew-bGgpNpb2oZcsNM3aQ&s" alt="Album Cover" /> -->
-        <img id="cover" class="cover"
-          src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e"
-          crossorigin="anonymous" 
-          alt="Album Cover" />
-    <div class="play-icon">▶</div>
-    <div class="info-container">
-      <div class="info">
-        <span id="track" class="track">Track Name</span>
-        <span class="dot">•</span>
-        <span id="artist" class="artist">Artist Name</span>
-      </div>
-      <div class="progress-wrapper">
-        <div class="progress-bar" id="progress-bar"></div>
+  <body>
+    <div id="player" class="widget">
+      <img
+        id="cover"
+        class="cover"
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGh5WFH8TOIfRKxUrIgJZoDCs1yvQ4hIcppw&s"
+        crossorigin="anonymous"
+        alt="Album Cover"
+      />
+      <div class="play-icon">▶</div>
+      <div class="info-container">
+        <div class="info">
+          <span id="track" class="track">Track Name</span>
+          <span class="dot">•</span>
+          <span id="artist" class="artist">Artist Name</span>
+        </div>
+        <div class="progress-wrapper">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
       </div>
     </div>
-  </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
-  <script src="script.js"></script>
-</body>
 
+    <script src="script.js"></script>
+  </body>
 </html>

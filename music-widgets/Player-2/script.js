@@ -1,70 +1,76 @@
 const trackElem = document.getElementById("track");
 const artistElem = document.getElementById("artist");
-const progressBar = document.getElementById("progress-bar");
+const albumElem = document.getElementById("album");
 const coverImg = document.getElementById("cover");
+const progressBar = document.getElementById("progress-bar");
 
 let lastTrack = "";
 let progress = 0;
-const duration = 220;
+const duration = 210; // 3:30 in seconds
 
 function fetchSnipData() {
-  fetch("Snip.txt")
+  fetch("../Snip.txt")
     .then((res) => res.text())
     .then((data) => {
-      const lines = data.split("\n");
-      let track = "",
-        artist = "",
-        album = "",
-        coverUrl = "";
+      console.log(data);
+      const line = data.trim();
+      const match = line.match(/“(.+?)”\s*―\s*(.+?)(?:,\s*(.+))?$/);
 
-      lines.forEach((line) => {
-        if (line.startsWith("Track:"))
-          track = line.replace("Track: ", "").trim();
-        if (line.startsWith("Artist:"))
-          artist = line.replace("Artist: ", "").trim();
-        if (line.startsWith("Album:"))
-          album = line.replace("Album: ", "").trim();
-        if (line.startsWith("Cover:"))
-          coverUrl = line.replace("Cover: ", "").trim();
-      });
+      if (match) {
+        const [_, track, artist, album] = match;
 
-      if (track && track !== lastTrack) {
-        progress = 0;
-        updateInfo(track, artist, coverUrl);
-        lastTrack = track;
+        if (track !== lastTrack) {
+          progress = 0;
+          const coverUrl = "../Snip_Artwork.jpg";
+          updateInfo(track, artist, album, coverUrl);
+          lastTrack = track;
+        }
       }
-    });
+    })
+    .catch((err) => console.error("Error reading Snip.txt:", err));
 }
 
-function updateInfo(track, artist, cover) {
-  trackElem.textContent = track;
-  artistElem.textContent = artist;
-  if (cover) {
+function updateInfo(track, artist, album, coverUrl) {
+  if (trackElem) trackElem.textContent = track;
+  if (artistElem) artistElem.textContent = artist;
+  if (albumElem) albumElem.textContent = album;
+  if (coverImg && coverUrl) {
     coverImg.crossOrigin = "Anonymous";
-    coverImg.src = cover;
+    coverImg.src = coverUrl;
   }
 }
 
 function updateProgress() {
   if (progress < duration) progress++;
   const percent = (progress / duration) * 100;
-  progressBar.style.width = `${percent}%`;
+  if (progressBar) progressBar.style.width = `${percent}%`;
 }
 
 // Helper: Convert RGB to HSL
 function rgbToHsl(r, g, b) {
-  r /= 255; g /= 255; b /= 255;
-  const max = Math.max(r, g, b), min = Math.min(r, g, b);
-  let h, s, l = (max + min) / 2;
+  r /= 255;
+  g /= 255;
+  b /= 255;
+  const max = Math.max(r, g, b),
+    min = Math.min(r, g, b);
+  let h,
+    s,
+    l = (max + min) / 2;
   if (max === min) {
     h = s = 0;
   } else {
     const d = max - min;
     s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
     switch (max) {
-      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-      case g: h = (b - r) / d + 2; break;
-      case b: h = (r - g) / d + 4; break;
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0);
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      case b:
+        h = (r - g) / d + 4;
+        break;
     }
     h /= 6;
   }
@@ -81,16 +87,16 @@ function hslToRgb(h, s, l) {
     const hue2rgb = (p, q, t) => {
       if (t < 0) t += 1;
       if (t > 1) t -= 1;
-      if (t < 1/6) return p + (q - p) * 6 * t;
-      if (t < 1/2) return q;
-      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      if (t < 1 / 6) return p + (q - p) * 6 * t;
+      if (t < 1 / 2) return q;
+      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
       return p;
     };
     const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
     const p = 2 * l - q;
-    r = hue2rgb(p, q, h + 1/3);
+    r = hue2rgb(p, q, h + 1 / 3);
     g = hue2rgb(p, q, h);
-    b = hue2rgb(p, q, h - 1/3);
+    b = hue2rgb(p, q, h - 1 / 3);
   }
   return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }
@@ -116,7 +122,7 @@ function brighten(rgb, amount = 0.8) {
 }
 
 function setPlayerGradient() {
-  const playerElem = document.querySelector('.player');
+  const playerElem = document.querySelector(".widget");
   if (!window.ColorThief || !coverImg.complete) return;
   try {
     const colorThief = new ColorThief();
@@ -129,12 +135,12 @@ function setPlayerGradient() {
       playerElem.style.background = `linear-gradient(90deg, ${color1}, ${color2})`;
     }
   } catch (e) {
-    playerElem.style.background = '#e7e6f0';
+    playerElem.style.background = "#e7e6f0";
   }
 }
 
 // Update gradient when cover loads
-coverImg.addEventListener('load', setPlayerGradient);
+coverImg.addEventListener("load", setPlayerGradient);
 
 setInterval(fetchSnipData, 2000);
 setInterval(updateProgress, 1000);

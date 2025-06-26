@@ -2,45 +2,46 @@ const trackElem = document.getElementById("track");
 const artistElem = document.getElementById("artist");
 const progressBar = document.getElementById("progress-bar");
 const coverImg = document.getElementById("cover");
+const albumElem = document.getElementById("album");
 const currentTimeElem = document.getElementById("current-time");
 const totalTimeElem = document.getElementById("total-time");
 const knob = document.getElementById("progress-knob");
 
 let lastTrack = "";
-let progress = 90; // seconds
+let progress = 0; // seconds
 const duration = 220; // 3:40 in seconds
 const fullLength = 420;
 
 function fetchSnipData() {
-  fetch("Snip.txt")
+  fetch("../Snip.txt")
     .then((res) => res.text())
     .then((data) => {
-      const lines = data.split("\n");
-      let track = "",
-        artist = "",
-        cover = "";
+      console.log(data);
+      const line = data.trim();
+      const match = line.match(/“(.+?)”\s*―\s*(.+?)(?:,\s*(.+))?$/);
 
-      lines.forEach((line) => {
-        if (line.startsWith("Track:"))
-          track = line.replace("Track: ", "").trim();
-        if (line.startsWith("Artist:"))
-          artist = line.replace("Artist: ", "").trim();
-        if (line.startsWith("Cover:"))
-          cover = line.replace("Cover: ", "").trim();
-      });
+      if (match) {
+        const [_, track, artist, album] = match;
 
-      if (track && track !== lastTrack) {
-        progress = 0;
-        updateTrack(track, artist, cover);
-        lastTrack = track;
+        if (track !== lastTrack) {
+          progress = 0;
+          const coverUrl = "../Snip_Artwork.jpg";
+          updateInfo(track, artist, album, coverUrl);
+          lastTrack = track;
+        }
       }
-    });
+    })
+    .catch((err) => console.error("Error reading Snip.txt:", err));
 }
 
-function updateTrack(title, artist, cover) {
-  trackElem.textContent = title;
-  artistElem.textContent = artist;
-  if (cover) coverImg.src = cover;
+function updateInfo(track, artist, album, coverUrl) {
+  if (trackElem) trackElem.textContent = track;
+  if (artistElem) artistElem.textContent = artist;
+  if (albumElem) albumElem.textContent = album;
+  if (coverImg && coverUrl) {
+    coverImg.crossOrigin = "Anonymous";
+    coverImg.src = coverUrl;
+  }
 }
 
 function updateProgress() {

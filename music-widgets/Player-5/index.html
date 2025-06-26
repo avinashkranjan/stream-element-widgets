@@ -1,32 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
+    <title>Now Playing</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
-  <title>Now Playing</title>
-</head>
-
-<body>
-  <div class="widget">
-    <img id="cover" class="cover" src="" alt="Album Art" crossorigin="anonymous" />
-    <div class="glass">
-      <h1 class="track" id="title">Song Title</h1>
-      <p class="artist" id="artist">Artist</p>
-      <div class="controls">
-        <span class="icon">▶</span>
-        <span class="time" id="current">0:00</span>
-        <div class="progress">
-          <div class="bar" id="bar" style="width: 0%;"></div>
+  <body>
+    <div class="widget">
+      <img
+        id="cover"
+        class="cover"
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGh5WFH8TOIfRKxUrIgJZoDCs1yvQ4hIcppw&s"
+        alt="Album Art"
+        crossorigin="anonymous"
+      />
+      <div class="glass">
+        <h1 class="track" id="title">Track Name</h1>
+        <p class="artist" id="artist">Artist Name</p>
+        <div class="controls">
+          <span class="icon">▶</span>
+          <span class="time" id="current">0:00</span>
+          <div class="progress">
+            <div class="bar" id="bar" style="width: 0%"></div>
+          </div>
+          <span class="time" id="duration">3:40</span>
         </div>
-        <span class="time" id="duration">0:00</span>
       </div>
     </div>
-  </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
-  <script src="script.js"></script>
-</body>
-
+    <script src="script.js"></script>
+  </body>
 </html>

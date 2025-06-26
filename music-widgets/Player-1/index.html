@@ -1,28 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Now Playing Widget</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Now Playing Widget</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-
-<body>
-  <div class="player">
-    <div class="play-icon">▶</div>
-    <div class="progress-container">
-      <div class="progress-bar" id="progress-bar"></div>
+  <body>
+    <div class="player">
+      <div class="play-icon">▶</div>
+      <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <div class="info">
+        <span class="colon">⋮</span>
+        <span id="track" class="track">Track Name</span>
+        <span class="separator">|</span>
+        <span id="artist" class="artist">Artist Name</span>
+      </div>
     </div>
-    <div class="info">
-      <span class="colon">⋮</span>
-      <span id="track" class="track">Track Name</span>
-      <span class="separator">|</span>
-      <span id="artist" class="artist">Artist Name</span>
-    </div>
-  </div>
 
-  <script src="script.js"></script>
-</body>
-
+    <script src="script.js"></script>
+  </body>
 </html>

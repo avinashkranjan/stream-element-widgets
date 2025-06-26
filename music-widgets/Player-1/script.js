@@ -1,5 +1,6 @@
 const trackElem = document.getElementById("track");
 const artistElem = document.getElementById("artist");
+const albumElem = document.getElementById("album"); // 👈 Add this in HTML too
 const progressBar = document.getElementById("progress-bar");
 
 let lastTrack = "";
@@ -7,18 +8,20 @@ let progress = 0;
 const duration = 210; // 3:30 in seconds
 
 function fetchSnipData() {
-  fetch("Snip.txt")
+  fetch("../Snip.txt")
     .then((res) => res.text())
     .then((data) => {
+      console.log(data);
       const line = data.trim();
-      const match = line.match(/“(.+?)”\s*―\s*(.+?),\s*(.+)/);
+      console.log("Line from Snip.txt:", line);
+      const match = line.match(/“(.+?)”\s*―\s*(.+?)(?:,\s*(.+))?$/);
 
       if (match) {
         const [_, track, artist, album] = match;
 
-        if (track && track !== lastTrack) {
+        if (track !== lastTrack) {
           progress = 0;
-          updateInfo(track, artist);
+          updateInfo(track, artist, album);
           lastTrack = track;
         }
       }
@@ -26,15 +29,16 @@ function fetchSnipData() {
     .catch((err) => console.error("Error reading Snip.txt:", err));
 }
 
-function updateInfo(track, artist) {
-  trackElem.textContent = track;
-  artistElem.textContent = artist;
+function updateInfo(track, artist, album) {
+  if (trackElem) trackElem.textContent = track;
+  if (artistElem) artistElem.textContent = artist;
+  if (albumElem) albumElem.textContent = album;
 }
 
 function updateProgress() {
   if (progress < duration) progress++;
   const percent = (progress / duration) * 100;
-  progressBar.style.width = `${percent}%`;
+  if (progressBar) progressBar.style.width = `${percent}%`;
 }
 
 setInterval(fetchSnipData, 2000);

@@ -1,31 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
+    <title>Now Playing Widget</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
-  <title>Now Playing Widget</title>
-</head>
-
-<body>
-  <div class="widget">
-    <div class="info">
-      <h1 id="track">Until I found you</h1>
-      <p id="artist">Stephen Sanchez</p>
-    </div>
-    <div class="controls">
-      <span class="play-icon">▶</span>
-      <span id="current-time">2:20</span>
-      <div class="progress-wrapper">
-        <div class="progress-bar" id="progress-bar"></div>
+  <body>
+    <div class="widget">
+      <div class="info">
+        <h1 id="track">Track Name</h1>
+        <p id="artist">Artist Name</p>
       </div>
-      <span id="total-time">3:40</span>
+      <div class="controls">
+        <span class="play-icon">▶</span>
+        <span id="current-time">0:00</span>
+        <div class="progress-wrapper">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <span id="total-time">3:40</span>
+      </div>
+      <img
+        id="cover"
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGh5WFH8TOIfRKxUrIgJZoDCs1yvQ4hIcppw&s"
+        alt="Album Cover"
+        class="cover"
+        crossorigin="anonymous"
+      />
     </div>
-    <img id="cover" src="cover.jpg" alt="Album Cover" class="cover" crossorigin="anonymous" />
-  </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
-  <script src="script.js"></script>
-</body>
 
+    <script src="script.js"></script>
+  </body>
 </html>

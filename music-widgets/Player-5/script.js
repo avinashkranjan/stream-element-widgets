@@ -1,54 +1,46 @@
 let lastTrack = "";
 let progress = 0;
-let duration = 200; // fallback default duration
+let duration = 220;
 
 // DOM elements
-const titleElem = document.getElementById("title");
+const trackElem = document.getElementById("title");
 const artistElem = document.getElementById("artist");
-const coverElem = document.getElementById("cover");
+const coverImg = document.getElementById("cover");
+const albumElem = document.getElementById("album");
 const currentElem = document.getElementById("current");
 const durationElem = document.getElementById("duration");
 const progressBar = document.getElementById("bar");
 
 function fetchSnipData() {
-  fetch("Snip.txt")
+  fetch("../Snip.txt")
     .then((res) => res.text())
     .then((data) => {
-      const lines = data.split("\n");
-      let track = "",
-        artist = "",
-        cover = "",
-        length = "";
+      console.log(data);
+      const line = data.trim();
+      const match = line.match(/“(.+?)”\s*―\s*(.+?)(?:,\s*(.+))?$/);
 
-      lines.forEach((line) => {
-        if (line.startsWith("Track:"))
-          track = line.replace("Track: ", "").trim();
-        if (line.startsWith("Artist:"))
-          artist = line.replace("Artist: ", "").trim();
-        if (line.startsWith("Cover:"))
-          cover = line.replace("Cover: ", "").trim();
-        if (line.startsWith("Length:"))
-          length = line.replace("Length: ", "").trim();
-      });
+      if (match) {
+        const [_, track, artist, album] = match;
 
-      if (track && track !== lastTrack) {
-        lastTrack = track;
-        progress = 0;
-        duration = parseTimeToSeconds(length || "3:00");
-        updateWidget(track, artist, cover);
+        if (track !== lastTrack) {
+          progress = 0;
+          const coverUrl = "../Snip_Artwork.jpg";
+          updateInfo(track, artist, album, coverUrl);
+          lastTrack = track;
+        }
       }
     })
-    .catch((err) => console.error("Error fetching Snip.txt:", err));
+    .catch((err) => console.error("Error reading Snip.txt:", err));
 }
 
-function updateWidget(track, artist, cover) {
-  titleElem.textContent = track;
-  artistElem.textContent = artist;
-  if (cover) {
-    coverElem.crossOrigin = "Anonymous";
-    coverElem.src = cover;
+function updateInfo(track, artist, album, coverUrl) {
+  if (trackElem) trackElem.textContent = track;
+  if (artistElem) artistElem.textContent = artist;
+  if (albumElem) albumElem.textContent = album;
+  if (coverImg && coverUrl) {
+    coverImg.crossOrigin = "Anonymous";
+    coverImg.src = coverUrl;
   }
-  durationElem.textContent = formatTime(duration);
 }
 
 function updateProgress() {
@@ -71,18 +63,29 @@ function parseTimeToSeconds(timeStr) {
 
 // Helper: Convert RGB to HSL
 function rgbToHsl(r, g, b) {
-  r /= 255; g /= 255; b /= 255;
-  const max = Math.max(r, g, b), min = Math.min(r, g, b);
-  let h, s, l = (max + min) / 2;
+  r /= 255;
+  g /= 255;
+  b /= 255;
+  const max = Math.max(r, g, b),
+    min = Math.min(r, g, b);
+  let h,
+    s,
+    l = (max + min) / 2;
   if (max === min) {
     h = s = 0;
   } else {
     const d = max - min;
     s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
     switch (max) {
-      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-      case g: h = (b - r) / d + 2; break;
-      case b: h = (r - g) / d + 4; break;
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0);
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      case b:
+        h = (r - g) / d + 4;
+        break;
     }
     h /= 6;
   }
@@ -99,27 +102,27 @@ function hslToRgb(h, s, l) {
     const hue2rgb = (p, q, t) => {
       if (t < 0) t += 1;
       if (t > 1) t -= 1;
-      if (t < 1/6) return p + (q - p) * 6 * t;
-      if (t < 1/2) return q;
-      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      if (t < 1 / 6) return p + (q - p) * 6 * t;
+      if (t < 1 / 2) return q;
+      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
       return p;
     };
     const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
     const p = 2 * l - q;
-    r = hue2rgb(p, q, h + 1/3);
+    r = hue2rgb(p, q, h + 1 / 3);
     g = hue2rgb(p, q, h);
-    b = hue2rgb(p, q, h - 1/3);
+    b = hue2rgb(p, q, h - 1 / 3);
   }
   return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }
 
 function setGlassGradient() {
-  const glassElem = document.querySelector('.glass');
-  if (!window.ColorThief || !coverElem.complete || !glassElem) return;
+  const glassElem = document.querySelector(".glass");
+  if (!window.ColorThief || !coverImg.complete || !glassElem) return;
   try {
     const colorThief = new ColorThief();
-    if (coverElem.naturalWidth > 0 && coverElem.naturalHeight > 0) {
-      const dominant = colorThief.getColor(coverElem);
+    if (coverImg.naturalWidth > 0 && coverImg.naturalHeight > 0) {
+      const dominant = colorThief.getColor(coverImg);
       const accent = `rgb(${dominant[0]}, ${dominant[1]}, ${dominant[2]})`;
       const accentTransparent = `rgba(${dominant[0]}, ${dominant[1]}, ${dominant[2]}, 0)`;
       glassElem.style.background = `linear-gradient(to bottom, ${accent}, ${accentTransparent})`;
@@ -131,7 +134,7 @@ function setGlassGradient() {
 }
 
 // Update gradient when cover loads
-coverElem.addEventListener('load', setGlassGradient);
+coverImg.addEventListener("load", setGlassGradient);
 
 // Refresh data and update progress
 setInterval(fetchSnipData, 2000);
