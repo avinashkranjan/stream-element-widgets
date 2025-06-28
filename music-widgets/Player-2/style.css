@@ -24,7 +24,21 @@ body {
   width: 72px;
   height: 72px;
   border-radius: 10px;
-  object-fit: cover;
+  transition: mask-image 0.3s ease, -webkit-mask-image 0.3s ease;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 1) 40%,
+    rgba(0, 0, 0, 0.8) 60%,
+    rgba(0, 0, 0, 0.3) 80%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 1) 40%,
+    rgba(0, 0, 0, 0.8) 60%,
+    rgba(0, 0, 0, 0.3) 80%,
+    rgba(0, 0, 0, 0) 100%
+  );
 }
 
 .play-icon {
