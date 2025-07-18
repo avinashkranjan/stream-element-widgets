@@ -8,7 +8,15 @@ import BannerWidget from "@/components/widget-types/banner";
 import BannerGlassWidget from "@/components/widget-types/banner-glass";
 import ImmersiveWidget from "@/components/widget-types/immersive";
 
-export default function Widget({ params: { id } }: { params: { id: string } }) {
+interface WidgetPageProps {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export default async function Widget({ params }: WidgetPageProps) {
+  const { id } = await params;
+
   const [data, setData] = useState<any>(null);
   const [type, setType] = useState<
     "minimal" | "classic" | "banner" | "banner-glass" | "immersive"
@@ -33,7 +41,7 @@ export default function Widget({ params: { id } }: { params: { id: string } }) {
     fetchNow();
     const iv = setInterval(fetchNow, 5000);
     return () => clearInterval(iv);
-  }, []);
+  }, [id]); // Add id as dependency
 
   const renderByType = () => {
     if (!data)
@@ -157,7 +165,7 @@ export default function Widget({ params: { id } }: { params: { id: string } }) {
       setBg(`rgb(${r},${g},${b})`);
     }
     console.log("Background color set to:", bg);
-  }, [data]);
+  }, [data, bg]);
 
   return (
     <div className="rounded-lg overflow-hidden" style={{ backgroundColor: bg }}>
