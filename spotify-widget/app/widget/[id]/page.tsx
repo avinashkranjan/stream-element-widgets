@@ -7,28 +7,26 @@ import ClassicWidget from "@/components/widget-types/classic";
 import BannerWidget from "@/components/widget-types/banner";
 import BannerGlassWidget from "@/components/widget-types/banner-glass";
 import ImmersiveWidget from "@/components/widget-types/immersive";
-import { redirect } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
-interface WidgetPageProps {
-  params: Promise<{
-    id: string;
-  }>;
-}
-
-export default async function Widget({ params }: WidgetPageProps) {
-  const { id } = await params;
-
-  if (!id || id === null || id === "null") {
-    redirect("/create");
-  }
+export default function Widget() {
+  const params = useParams();
+  const { id } = params;
+  const router = useRouter();
 
   const [data, setData] = useState<any>(null);
   const [type, setType] = useState<
     "minimal" | "classic" | "banner" | "banner-glass" | "immersive"
   >("classic");
-
   const [bg, setBg] = useState("rgb(30,30,30)");
+  const [error, setError] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    if (!id || id === "null") {
+      router.push("/create");
+    }
+  }, [id, router]);
 
   const fetchMeta = async () => {
     const meta = await fetch(`/api/widget/meta?id=${id}`).then((r) => r.json());
@@ -36,9 +34,20 @@ export default async function Widget({ params }: WidgetPageProps) {
   };
 
   const fetchNow = async () => {
-    const res = await fetch(`/api/spotify/now-playing?id=${id}`);
-    const json = await res.json();
-    setData(json.item ? json : null);
+    try {
+      const res = await fetch(`/api/spotify/now-playing?id=${id}`);
+      const json = await res.json();
+
+      if (res.status === 401 || json?.error?.status === 401) {
+        setError("Spotify access token expired. Please reconnect.");
+        return;
+      }
+
+      setData(json.item ? json : null);
+    } catch (err) {
+      console.error("Error fetching now playing:", err);
+      setError("Something went wrong while fetching your Spotify data.");
+    }
   };
 
   useEffect(() => {
@@ -46,10 +55,53 @@ export default async function Widget({ params }: WidgetPageProps) {
     fetchNow();
     const iv = setInterval(fetchNow, 5000);
     return () => clearInterval(iv);
-  }, [id]); // Add id as dependency
+  }, [id]);
+
+  useEffect(() => {
+    if (imgRef.current && imgRef.current.complete) {
+      try {
+        const ct = new ColorThief();
+        const [r, g, b] = ct.getColor(imgRef.current);
+        setBg(`rgb(${r},${g},${b})`);
+      } catch (e) {
+        console.warn("ColorThief failed", e);
+      }
+    }
+  }, [data]);
 
   const renderByType = () => {
-    if (!data)
+    if (error) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1e1e2f] to-[#121212] font-sans px-4">
+          <div className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-xl px-8 py-10 max-w-sm text-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-8 w-8 mx-auto mb-2 text-red-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M18.364 5.636l-12.728 12.728m0-12.728l12.728 12.728"
+              />
+            </svg>
+            <h2 className="text-white text-xl font-semibold mb-2">Error</h2>
+            <p className="text-red-400 text-sm mb-4">{error}</p>
+            <button
+              onClick={() => router.push("/")}
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition cursor-pointer"
+            >
+              Go to Login
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    if (!data) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1e1e2f] to-[#121212] font-sans px-4">
           <div className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-xl px-8 py-10 max-w-sm text-center">
@@ -74,32 +126,23 @@ export default async function Widget({ params }: WidgetPageProps) {
               We're not receiving any data at the moment. Please try again later
               or check your connection.
             </p>
+            <button
+              onClick={() => router.push("/create")}
+              className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded transition mt-4 cursor-pointer"
+            >
+              Go to Create Page
+            </button>
           </div>
         </div>
       );
+    }
+
     const { item, is_playing, progress_ms } = data;
     const dur = item.duration_ms;
     const pct = (progress_ms / dur) * 100;
-
     const Artist = item.artists.map((a: any) => a.name).join(", ");
-    const Cover = (
-      <img
-        ref={imgRef}
-        crossOrigin="anonymous"
-        src={item.album.images[0].url}
-        alt="cover"
-      />
-    );
 
-    switch (
-      type as
-        | string
-        | "classic"
-        | "banner"
-        | "banner-glass"
-        | "minimal"
-        | "immersive"
-    ) {
+    switch (type) {
       case "minimal":
         return (
           <MinimalWidget
@@ -162,15 +205,6 @@ export default async function Widget({ params }: WidgetPageProps) {
         );
     }
   };
-
-  useEffect(() => {
-    if (imgRef.current && imgRef.current.complete) {
-      const ct = new ColorThief();
-      const [r, g, b] = ct.getColor(imgRef.current);
-      setBg(`rgb(${r},${g},${b})`);
-    }
-    console.log("Background color set to:", bg);
-  }, [data, bg]);
 
   return (
     <div className="rounded-lg overflow-hidden" style={{ backgroundColor: bg }}>
