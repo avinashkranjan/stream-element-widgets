@@ -1,38 +1,40 @@
-import { NextResponse, NextRequest } from "next/server";
+import dbConnect from "@/lib/mongodb";
+import Token from "@/models/token.model";
 import axios from "axios";
-import { serialize } from "cookie";
+import { NextResponse } from "next/server";
 
-export async function GET(req: NextRequest) {
-  const code = req.nextUrl.searchParams.get("code");
-  const creds = Buffer.from(
-    `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
-  ).toString("base64");
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const code = url.searchParams.get("code");
+  const widgetId = url.searchParams.get("state");
 
-  const resp = await axios.post(
+  const redirect_uri = `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/callback`;
+
+  const { data } = await axios.post(
     "https://accounts.spotify.com/api/token",
     new URLSearchParams({
       grant_type: "authorization_code",
       code: code!,
-      redirect_uri: process.env.SPOTIFY_REDIRECT_URI!,
+      redirect_uri,
+      client_id: process.env.SPOTIFY_CLIENT_ID!,
+      client_secret: process.env.SPOTIFY_CLIENT_SECRET!,
     }),
-    { headers: { Authorization: `Basic ${creds}` } }
+    { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
   );
 
-  const { access_token, refresh_token, expires_in } = resp.data;
+  const { access_token, refresh_token } = data;
 
-  const response = NextResponse.redirect(new URL("/widget", req.url));
-  const cookieParams = { httpOnly: true, secure: true, path: "/" };
+  await dbConnect();
+  await Token.updateOne(
+    { widgetId },
+    {
+      access_token,
+      refresh_token,
+      status: "active",
+    }
+  );
 
-  response.headers.append(
-    "Set-Cookie",
-    serialize("sp_at", access_token, { ...cookieParams, maxAge: expires_in })
+  return NextResponse.redirect(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/widget?id=${widgetId}`
   );
-  response.headers.append(
-    "Set-Cookie",
-    serialize("sp_rt", refresh_token, {
-      ...cookieParams,
-      maxAge: 60 * 60 * 24 * 30,
-    })
-  );
-  return response;
 }

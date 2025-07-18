@@ -1,60 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/lib/mongodb";
+import Token from "@/models/token.model";
 import axios from "axios";
-import { serialize } from "cookie";
 
 export async function GET(req: NextRequest) {
-  let at = req.cookies.get("sp_at")?.value;
-  const rt = req.cookies.get("sp_rt")?.value;
-  if (!at)
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  const id = req.nextUrl.searchParams.get("id");
+  if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+
+  await dbConnect();
+  const token = await Token.findOne({ widgetId: id });
+  if (!token || !token.access_token) {
+    return NextResponse.json({ error: "Token not found" }, { status: 401 });
+  }
 
   try {
-    const resp = await axios.get(
+    const response = await axios.get(
       "https://api.spotify.com/v1/me/player/currently-playing",
       {
-        headers: { Authorization: `Bearer ${at}` },
+        headers: { Authorization: `Bearer ${token.access_token}` },
       }
     );
-    return NextResponse.json(resp.data);
-  } catch (err: any) {
-    if (err.response?.status === 401 && rt) {
-      const creds = Buffer.from(
-        `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
-      ).toString("base64");
-      const tokenResp = await axios.post(
-        "https://accounts.spotify.com/api/token",
-        new URLSearchParams({
-          grant_type: "refresh_token",
-          refresh_token: rt,
-        }),
-        { headers: { Authorization: `Basic ${creds}` } }
-      );
 
-      const newAt = tokenResp.data.access_token;
-      const expires = tokenResp.data.expires_in;
-
-      const newData = await axios.get(
-        "https://api.spotify.com/v1/me/player/currently-playing",
-        {
-          headers: { Authorization: `Bearer ${newAt}` },
-        }
-      );
-
-      const response = NextResponse.json(newData.data);
-      response.headers.append(
-        "Set-Cookie",
-        serialize("sp_at", newAt, {
-          httpOnly: true,
-          secure: true,
-          path: "/",
-          maxAge: expires,
-        })
-      );
-      return response;
+    if (response.status === 204) {
+      return NextResponse.json({ isPlaying: false });
     }
+
+    return NextResponse.json(response.data);
+  } catch (err: any) {
+    console.error(err.response?.data || err.message);
     return NextResponse.json(
-      { error: "Spotify fetch error" },
-      { status: err.response?.status || 500 }
+      { error: "Failed to fetch now playing" },
+      { status: 500 }
     );
   }
 }
