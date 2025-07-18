@@ -1,3 +1,9 @@
+import BannerWidget from "./widget-types/banner";
+import BannerGlassWidget from "./widget-types/banner-glass";
+import ClassicWidget from "./widget-types/classic";
+import ImmersiveWidget from "./widget-types/immersive";
+import MinimalWidget from "./widget-types/minimal";
+
 const PREVIEW_DATA = {
   item: {
     name: "Mockingbird",
@@ -28,55 +34,74 @@ const WidgetPreview = ({ type }: { type: string }) => {
     />
   );
 
-  switch (type) {
+  switch (
+    type as
+      | string
+      | "classic"
+      | "banner"
+      | "banner-glass"
+      | "minimal"
+      | "immersive"
+  ) {
     case "minimal":
       return (
-        <div className="text-white bg-gray-800 p-4 rounded-lg w-64 text-center">
-          <p className="text-lg font-semibold">{item.name}</p>
-          <p className="text-sm text-gray-300">{artist}</p>
-        </div>
+        <MinimalWidget
+          trackName={item.name}
+          artistName={artist?.split(",")[0]}
+          isPlaying={true}
+          coverImage={item.album.images[0].url}
+          progress={65}
+          isPreview={true}
+        />
       );
-    case "compact":
-      return <div className="w-24 h-24 rounded overflow-hidden">{cover}</div>;
+    case "classic":
+      return (
+        <ClassicWidget
+          trackName={item.name}
+          artistName={artist?.split(",")[0]}
+          isPlaying={true}
+          isPreview={true}
+          progress={65}
+          coverImage={item.album.images[0].url}
+        />
+      );
     case "banner":
       return (
-        <div className="flex items-center bg-gray-800 text-white p-4 rounded-lg space-x-4 w-[350px]">
-          <div className="w-16 h-16 rounded overflow-hidden">{cover}</div>
-          <div>
-            <p className="text-lg font-bold">{item.name}</p>
-            <p className="text-sm text-gray-300">{artist}</p>
-          </div>
-        </div>
+        <BannerWidget
+          trackName={item.name}
+          artistName={artist?.split(",")[0]}
+          isPlaying={true}
+          isPreview={true}
+          progress={65}
+          coverImage={item.album.images[0].url}
+          duration={dur}
+          currentTime={progress_ms}
+        />
       );
-    case "stats":
+    case "banner-glass":
       return (
-        <div className="bg-gray-800 text-white p-4 rounded-lg w-64">
-          <p>
-            {item.name} – {artist}
-          </p>
-          <p className="text-sm text-gray-300">
-            Duration: {(dur / 1000).toFixed(0)}s
-          </p>
-          <p className="text-sm text-green-400">
-            Status: {is_playing ? "Playing" : "Paused"}
-          </p>
-        </div>
+        <BannerGlassWidget
+          trackName={item.name}
+          artistName={artist?.split(",")[0]}
+          isPlaying={true}
+          isPreview={true}
+          progress={65}
+          coverImage={item.album.images[0].url}
+          duration={dur}
+          currentTime={progress_ms}
+        />
       );
-    default: // classic
+    case "immersive":
       return (
-        <div className="flex bg-gray-800 text-white p-4 rounded-lg space-x-4 w-[350px]">
-          <div className="w-24 h-24 rounded overflow-hidden">{cover}</div>
-          <div className="flex-1">
-            <p className="text-lg font-bold">{item.name}</p>
-            <p className="text-sm text-gray-300">{artist}</p>
-            <div className="w-full bg-gray-600 h-1 mt-2 rounded">
-              <div
-                className="bg-green-400 h-full rounded"
-                style={{ width: `${pct}%` }}
-              />
-            </div>
-          </div>
-        </div>
+        <ImmersiveWidget
+          trackName={item.name}
+          artistName={artist?.split(",")[0]}
+          isPlaying={true}
+          isPreview={true}
+          coverImage={item.album.images[0].url}
+          currentTime={progress_ms}
+          duration={dur}
+        />
       );
   }
 };

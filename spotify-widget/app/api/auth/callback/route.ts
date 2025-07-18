@@ -35,6 +35,6 @@ export async function GET(req: Request) {
   );
 
   return NextResponse.redirect(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/widget?id=${widgetId}`
+    `${process.env.NEXT_PUBLIC_BASE_URL}/widget/${widgetId}`
   );
 }

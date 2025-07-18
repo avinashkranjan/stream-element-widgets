@@ -2,12 +2,18 @@
 
 import { useEffect, useRef, useState } from "react";
 import ColorThief from "colorthief";
+import MinimalWidget from "@/components/widget-types/minimal";
+import ClassicWidget from "@/components/widget-types/classic";
+import BannerWidget from "@/components/widget-types/banner";
+import BannerGlassWidget from "@/components/widget-types/banner-glass";
+import ImmersiveWidget from "@/components/widget-types/immersive";
 
 export default function Widget({ params: { id } }: { params: { id: string } }) {
   const [data, setData] = useState<any>(null);
   const [type, setType] = useState<
-    "classic" | "minimal" | "compact" | "banner" | "stats"
+    "minimal" | "classic" | "banner" | "banner-glass" | "immersive"
   >("classic");
+
   const [bg, setBg] = useState("rgb(30,30,30)");
   const imgRef = useRef<HTMLImageElement>(null);
 
@@ -31,7 +37,33 @@ export default function Widget({ params: { id } }: { params: { id: string } }) {
 
   const renderByType = () => {
     if (!data)
-      return <div className="text-white text-center p-4">Nothing Playing</div>;
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1e1e2f] to-[#121212] font-sans px-4">
+          <div className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-xl px-8 py-10 max-w-sm text-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-8 w-8 mx-auto mb-2 text-gray-300"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9.75 9.75h4.5m-2.25 4.5h.008M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <h2 className="text-white text-xl font-semibold mb-2">
+              No Data Available
+            </h2>
+            <p className="text-gray-400 text-sm">
+              We're not receiving any data at the moment. Please try again later
+              or check your connection.
+            </p>
+          </div>
+        </div>
+      );
     const { item, is_playing, progress_ms } = data;
     const dur = item.duration_ms;
     const pct = (progress_ms / dur) * 100;
@@ -46,47 +78,74 @@ export default function Widget({ params: { id } }: { params: { id: string } }) {
       />
     );
 
-    switch (type) {
+    switch (
+      type as
+        | string
+        | "classic"
+        | "banner"
+        | "banner-glass"
+        | "minimal"
+        | "immersive"
+    ) {
       case "minimal":
         return (
-          <div className="p-4">
-            <p>{item.name}</p>
-            <p>{Artist}</p>
-          </div>
+          <MinimalWidget
+            trackName={item.name}
+            artistName={Artist?.split(",")[0]}
+            coverImage={item.album.images[0].url}
+            isPlaying={is_playing}
+            progress={pct}
+            isPreview={false}
+          />
         );
-      case "compact":
-        return <div className="p-2 w-24 h-24">{Cover}</div>;
+      case "classic":
+        return (
+          <ClassicWidget
+            trackName={item.name}
+            artistName={Artist?.split(",")[0]}
+            isPlaying={is_playing}
+            isPreview={false}
+            progress={pct}
+            coverImage={item.album.images[0].url}
+          />
+        );
       case "banner":
         return (
-          <div className="flex items-center space-x-4 p-4">
-            <div className="w-20 h-20">{Cover}</div>
-            <div>
-              <p>{item.name}</p>
-              <p>{Artist}</p>
-            </div>
-          </div>
+          <BannerWidget
+            trackName={item.name}
+            artistName={Artist?.split(",")[0]}
+            isPlaying={is_playing}
+            isPreview={false}
+            progress={pct}
+            coverImage={item.album.images[0].url}
+            currentTime={progress_ms}
+            duration={item.duration_ms}
+          />
         );
-      case "stats":
+      case "banner-glass":
         return (
-          <div className="p-4">
-            <p>
-              {item.name} – {Artist}
-            </p>
-            <p>Duration: {(dur / 1000).toFixed(0)}s</p>
-          </div>
+          <BannerGlassWidget
+            trackName={item.name}
+            artistName={Artist?.split(",")[0]}
+            isPlaying={is_playing}
+            isPreview={false}
+            progress={pct}
+            coverImage={item.album.images[0].url}
+            currentTime={progress_ms}
+            duration={item.duration_ms}
+          />
         );
-      default:
+      case "immersive":
         return (
-          <div className="p-4 flex space-x-4">
-            <div className="w-24 h-24">{Cover}</div>
-            <div className="flex-1">
-              <p className="font-bold">{item.name}</p>
-              <p>{Artist}</p>
-              <div className="w-full bg-white/30 h-1 rounded">
-                <div className="bg-white h-full" style={{ width: `${pct}%` }} />
-              </div>
-            </div>
-          </div>
+          <ImmersiveWidget
+            trackName={item.name}
+            artistName={Artist?.split(",")[0]}
+            isPlaying={is_playing}
+            isPreview={false}
+            coverImage={item.album.images[0].url}
+            currentTime={progress_ms}
+            duration={item.duration_ms}
+          />
         );
     }
   };
@@ -97,6 +156,7 @@ export default function Widget({ params: { id } }: { params: { id: string } }) {
       const [r, g, b] = ct.getColor(imgRef.current);
       setBg(`rgb(${r},${g},${b})`);
     }
+    console.log("Background color set to:", bg);
   }, [data]);
 
   return (

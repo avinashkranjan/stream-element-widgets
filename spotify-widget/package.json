@@ -12,6 +12,7 @@
     "axios": "^1.10.0",
     "colorthief": "^2.6.0",
     "cookie": "^1.0.2",
+    "framer-motion": "^12.23.6",
     "mongoose": "^8.16.4",
     "next": "15.4.1",
     "react": "19.1.0",
