@@ -15,19 +15,30 @@ const TYPES = [
 export default function CreatePage() {
   const [selected, setSelected] = useState("classic");
   const [link, setLink] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const createWidget = async () => {
     const res = await axios.post("/api/widget/create", { type: selected });
     setLink(res.data.redirectUrl);
-    window.location.href = res.data.redirectUrl;
+    window.open(res.data.redirectUrl, "_blank");
+  };
+
+  const copyToClipboard = async () => {
+    if (link) {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center px-4">
       <div className="flex flex-col items-center w-full max-w-4xl py-12">
-        <h1 className="text-3xl font-bold mb-4">Choose Your Spotify Widget</h1>
+        <h1 className="text-3xl font-bold mb-6 text-center">
+          Choose Your Spotify Widget
+        </h1>
 
-        {/* Selector */}
+        {/* Widget Type Selector */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-8">
           {TYPES.map((t) => (
             <button
@@ -44,6 +55,7 @@ export default function CreatePage() {
           ))}
         </div>
 
+        {/* Live Preview */}
         <div className="mb-8 w-full">
           <h2 className="text-xl font-semibold mb-3 text-center">
             Live Preview
@@ -53,22 +65,43 @@ export default function CreatePage() {
           </div>
         </div>
 
-        {/* Submit */}
+        {/* Submit Button */}
         <button
           onClick={createWidget}
-          className="bg-blue-600 px-6 py-3 rounded hover:bg-blue-700 text-lg font-semibold"
+          className="bg-blue-600 px-6 py-3 rounded hover:bg-blue-700 text-lg font-semibold cursor-pointer transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Create {TYPES.find((t) => t.id === selected)?.name} Widget
         </button>
 
-        {/* Redirect Fallback */}
+        {/* Redirect Fallback / Copy UI */}
         {link && (
-          <p className="mt-4 break-all text-sm text-gray-400 text-center max-w-md">
-            If you’re not redirected automatically, open: <br />
-            <a href={link} className="text-blue-400 underline">
-              {link}
-            </a>
-          </p>
+          <div className="mt-6 w-full max-w-md bg-gray-800 p-4 rounded-lg text-center">
+            <p className="mb-2 text-sm text-gray-400">Your Widget Link:</p>
+            <div className="bg-gray-900 p-2 px-3 rounded flex items-center justify-between gap-2">
+              <a
+                href={link}
+                className="text-blue-400 break-all text-sm underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {link}
+              </a>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={copyToClipboard}
+                  className="bg-blue-600 hover:bg-blue-700 text-sm px-3 py-1 rounded cursor-pointer transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {copied ? "Copied!" : "Copy"}
+                </button>
+                <button
+                  onClick={() => window.open(link, "_blank")}
+                  className="bg-blue-600 hover:bg-blue-700 text-sm px-3 py-1 rounded cursor-pointer transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Preview Link
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

@@ -18,7 +18,7 @@ interface WidgetPageProps {
 export default async function Widget({ params }: WidgetPageProps) {
   const { id } = await params;
 
-  if (!id) {
+  if (!id || id === null || id === "null") {
     redirect("/create");
   }
 
