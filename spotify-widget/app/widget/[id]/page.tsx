@@ -7,6 +7,7 @@ import ClassicWidget from "@/components/widget-types/classic";
 import BannerWidget from "@/components/widget-types/banner";
 import BannerGlassWidget from "@/components/widget-types/banner-glass";
 import ImmersiveWidget from "@/components/widget-types/immersive";
+import { redirect } from "next/navigation";
 
 interface WidgetPageProps {
   params: Promise<{
@@ -16,6 +17,10 @@ interface WidgetPageProps {
 
 export default async function Widget({ params }: WidgetPageProps) {
   const { id } = await params;
+
+  if (!id) {
+    redirect("/create");
+  }
 
   const [data, setData] = useState<any>(null);
   const [type, setType] = useState<
