@@ -16,11 +16,21 @@ export default function CreatePage() {
   const [selected, setSelected] = useState("classic");
   const [link, setLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const createWidget = async () => {
-    const res = await axios.post("/api/widget/create", { type: selected });
-    setLink(res.data.redirectUrl);
-    window.open(res.data.redirectUrl, "_blank");
+    try {
+      setLoading(true);
+      const res = await axios.post("/api/widget/create", { type: selected });
+      setLink(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/widget/${res.data.widgetId}`
+      );
+      window.open(res.data.redirectUrl, "_blank");
+    } catch (err) {
+      console.error("Failed to create widget", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const copyToClipboard = async () => {
@@ -43,7 +53,11 @@ export default function CreatePage() {
           {TYPES.map((t) => (
             <button
               key={t.id}
-              onClick={() => setSelected(t.id)}
+              onClick={() => {
+                setSelected(t.id);
+                setLink(null);
+                setCopied(false);
+              }}
               className={`px-4 py-2 rounded-lg font-medium transition ${
                 selected === t.id
                   ? "bg-green-600"
@@ -68,14 +82,17 @@ export default function CreatePage() {
         {/* Submit Button */}
         <button
           onClick={createWidget}
+          disabled={loading}
           className="bg-blue-600 px-6 py-3 rounded hover:bg-blue-700 text-lg font-semibold cursor-pointer transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Create {TYPES.find((t) => t.id === selected)?.name} Widget
+          {loading
+            ? "Creating..."
+            : `Create ${TYPES.find((t) => t.id === selected)?.name} Widget`}
         </button>
 
         {/* Redirect Fallback / Copy UI */}
         {link && (
-          <div className="mt-6 w-full max-w-md bg-gray-800 p-4 rounded-lg text-center">
+          <div className="mt-6 w-full max-w-xl bg-gray-800 p-4 rounded-lg text-center">
             <p className="mb-2 text-sm text-gray-400">Your Widget Link:</p>
             <div className="bg-gray-900 p-2 px-3 rounded flex items-center justify-between gap-2">
               <a
