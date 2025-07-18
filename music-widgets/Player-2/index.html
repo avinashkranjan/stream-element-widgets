@@ -7,17 +7,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
     <title>Now Playing Widget</title>
   </head>
-
   <body>
     <div id="player" class="widget">
-      <img
-        id="cover"
-        class="cover"
-        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGh5WFH8TOIfRKxUrIgJZoDCs1yvQ4hIcppw&s"
-        crossorigin="anonymous"
-        alt="Album Cover"
-      />
-      <div id="play-icon" class="play-icon">▶</div>
+      <img id="cover" class="cover" crossorigin="anonymous" />
+      <div id="play-icon" class="play-icon"></div>
       <div class="info-container">
         <div class="info">
           <span id="track" class="track">Track Name</span>
@@ -33,59 +26,95 @@
     <script>
       const trackElem = document.getElementById("track");
       const artistElem = document.getElementById("artist");
-      const albumElem = document.getElementById("album");
       const coverImg = document.getElementById("cover");
       const progressBar = document.getElementById("progress-bar");
       const playIconElem = document.getElementById("play-icon");
-      const progressBarElem = document.getElementById("progress-bar");
+      const playerElem = document.getElementById("player");
 
       let lastTrack = "";
       let progress = 0;
-      const duration = 210; // 3:30 in seconds
+      const duration = 210;
+      let isPlaying = false;
+
+      const playIconSVG = `
+      <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="24" height="24">
+        <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd"/>
+      </svg>`;
+
+      const pauseIconSVG = `
+      <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="24" height="24">
+        <path fill-rule="evenodd" d="M6.75 5.25a.75.75 0 0 1 .75-.75H9a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V5.25Zm7.5 0A.75.75 0 0 1 15 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H15a.75.75 0 0 1-.75-.75V5.25Z" clip-rule="evenodd"/>
+      </svg>`;
+
+      function setIcon() {
+        playIconElem.innerHTML = isPlaying ? pauseIconSVG : playIconSVG;
+      }
+
+      function resetPlayer() {
+        trackElem.textContent = "Track Name";
+        artistElem.textContent = "Artist Name";
+        progressBar.style.width = "0%";
+        isPlaying = false;
+        setIcon();
+      }
 
       function fetchSnipData() {
         fetch("../Snip.txt")
           .then((res) => res.text())
           .then((data) => {
-            console.log(data);
             const line = data.trim();
+            if (!line) {
+              resetPlayer();
+              return;
+            }
+
             const match = line.match(/“(.+?)”\s*―\s*(.+?)(?:,\s*(.+))?$/);
+            if (!match) {
+              resetPlayer();
+              return;
+            }
 
-            if (match) {
-              const [_, track, artist, album] = match;
+            const [_, track, artist] = match;
 
-              if (track !== lastTrack) {
-                progress = 0;
-                const coverUrl = "../Snip_Artwork.jpg";
-                updateInfo(track, artist, album, coverUrl);
-                lastTrack = track;
-              }
+            if (track !== lastTrack) {
+              lastTrack = track;
+              progress = 0;
+              isPlaying = true;
+              trackElem.textContent = track;
+              artistElem.textContent = artist;
+              coverImg.src = "../Snip_Artwork.jpg?" + Date.now(); // avoid caching
+              setIcon();
             }
           })
-          .catch((err) => console.error("Error reading Snip.txt:", err));
-      }
-
-      function updateInfo(track, artist, album, coverUrl) {
-        if (trackElem) trackElem.textContent = track;
-        if (artistElem) artistElem.textContent = artist;
-        if (albumElem) albumElem.textContent = album;
-        if (coverImg && coverUrl) {
-          coverImg.crossOrigin = "Anonymous";
-          coverImg.src = coverUrl;
-        }
-        if (playIconElem) playIconElem.textContent = "⏸";
+          .catch((err) => {
+            console.error("Error reading Snip.txt:", err);
+            resetPlayer();
+          });
       }
 
       function updateProgress() {
+        if (!isPlaying) return;
+
         if (progress < duration) progress++;
         const percent = (progress / duration) * 100;
-        if (progressBar) progressBar.style.width = `${percent}%`;
-        if (progress >= duration && playIconElem) {
-          playIconElem.textContent = "▶";
+        progressBar.style.width = `${percent}%`;
+
+        if (progress >= duration) {
+          isPlaying = false;
+          setIcon();
         }
       }
 
-      // Helper: Convert RGB to HSL
+      function pastelize(rgb) {
+        let [h, s, l] = rgbToHsl(...rgb);
+        return hslToRgb(h, 0.3, 0.85);
+      }
+
+      function brighten(rgb, amount = 0.4) {
+        let [h, s, l] = rgbToHsl(...rgb);
+        return hslToRgb(h, s, Math.min(1, l + amount));
+      }
+
       function rgbToHsl(r, g, b) {
         r /= 255;
         g /= 255;
@@ -95,9 +124,9 @@
         let h,
           s,
           l = (max + min) / 2;
-        if (max === min) {
-          h = s = 0;
-        } else {
+
+        if (max === min) h = s = 0;
+        else {
           const d = max - min;
           s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
           switch (max) {
@@ -116,73 +145,41 @@
         return [h * 360, s, l];
       }
 
-      // Helper: Convert HSL to RGB
       function hslToRgb(h, s, l) {
         h /= 360;
-        let r, g, b;
-        if (s === 0) {
-          r = g = b = l;
-        } else {
-          const hue2rgb = (p, q, t) => {
-            if (t < 0) t += 1;
-            if (t > 1) t -= 1;
-            if (t < 1 / 6) return p + (q - p) * 6 * t;
-            if (t < 1 / 2) return q;
-            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-            return p;
-          };
-          const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-          const p = 2 * l - q;
-          r = hue2rgb(p, q, h + 1 / 3);
-          g = hue2rgb(p, q, h);
-          b = hue2rgb(p, q, h - 1 / 3);
-        }
+        const hue2rgb = (p, q, t) => {
+          if (t < 0) t += 1;
+          if (t > 1) t -= 1;
+          if (t < 1 / 6) return p + (q - p) * 6 * t;
+          if (t < 1 / 2) return q;
+          if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+          return p;
+        };
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        const r = hue2rgb(p, q, h + 1 / 3);
+        const g = hue2rgb(p, q, h);
+        const b = hue2rgb(p, q, h - 1 / 3);
         return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
       }
 
-      // Helper: Make color pastel
-      function pastelize(rgb) {
-        let [h, s, l] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
-        s = 0.3; // lower saturation for pastel
-        l = 0.85; // high lightness for pastel
-        return hslToRgb(h, s, l);
-      }
-
-      function darken(rgb, amount = 0.1) {
-        let [h, s, l] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
-        l = Math.max(0, l - amount); // decrease lightness
-        return hslToRgb(h, s, l);
-      }
-
-      function brighten(rgb, amount = 0.8) {
-        let [h, s, l] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
-        l = Math.min(1, l + amount); // increase lightness
-        return hslToRgb(h, s, l);
-      }
-
-      function setPlayerGradient() {
-        const playerElem = document.querySelector(".widget");
-        if (!window.ColorThief || !coverImg.complete) return;
+      function applyGradient() {
+        if (!coverImg.complete || coverImg.naturalWidth === 0) return;
         try {
-          const colorThief = new ColorThief();
-          if (coverImg.naturalWidth && coverImg.naturalHeight) {
-            const dominant = colorThief.getColor(coverImg);
-            const light = pastelize(dominant); // lighter version
-            const accent = brighten(dominant, 0.4); // brighter version of detected color
-            const color1 = `rgb(${light[0]}, ${light[1]}, ${light[2]})`;
-            const color2 = `rgb(${accent[0]}, ${accent[1]}, ${accent[2]})`;
-            const gradient = `linear-gradient(90deg, ${color1}, ${color2})`;
-            playerElem.style.background = gradient;
-            progressBarElem.style.background = gradient;
-          }
-        } catch (e) {
-          playerElem.style.background = "#e7e6f0";
+          const thief = new ColorThief();
+          const dominant = thief.getColor(coverImg);
+          const color1 = pastelize(dominant);
+          const color2 = brighten(dominant, 0.4);
+          playerElem.style.background = `linear-gradient(90deg, rgb(${color1}), rgb(${color2}))`;
+          progressBar.style.background = `rgb(${color2})`;
+        } catch {
+          playerElem.style.background = "#eee";
         }
       }
 
-      // Update gradient when cover loads
-      coverImg.addEventListener("load", setPlayerGradient);
+      coverImg.addEventListener("load", applyGradient);
 
+      setIcon();
       setInterval(fetchSnipData, 2000);
       setInterval(updateProgress, 1000);
     </script>
