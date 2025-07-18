@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Now Playing Widget</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div id="widget" class="widget">
+      <div id="play-icon" class="play-icon"></div>
+
+      <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+
+      <div class="info">
+        <img
+          id="artwork"
+          src="../Snip_Artwork.jpg"
+          crossorigin="anonymous"
+          style="display: none"
+        />
+        <span class="colon">⋮</span>
+        <span id="track" class="track">Track Name</span>
+        <span class="separator">|</span>
+        <span id="artist" class="artist">Artist Name</span>
+      </div>
+    </div>
+
+    <script>
+      const coverUrl = "../Snip_Artwork.jpg";
+      const widgetElem = document.getElementById("widget");
+      const coverImg = document.getElementById("artwork");
+      const trackElem = document.getElementById("track");
+      const artistElem = document.getElementById("artist");
+      const progressBar = document.getElementById("progress-bar");
+      const playIconElem = document.getElementById("play-icon");
+
+      let lastTrack = "";
+      let progress = 0;
+      const duration = 210; // 3:30
+      let isPlaying = false;
+
+      const colorThief = new ColorThief();
+
+      function setPlayIcon() {
+        if (!playIconElem) return;
+        playIconElem.innerHTML = isPlaying
+          ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+              <path fill-rule="evenodd" d="M6.75 5.25a.75.75 0 0 1 .75-.75H9a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V5.25Zm7.5 0A.75.75 0 0 1 15 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H15a.75.75 0 0 1-.75-.75V5.25Z" clip-rule="evenodd"/>
+            </svg>`
+          : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+              <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd"/>
+            </svg>`;
+      }
+
+      function updateProgress() {
+        if (!isPlaying) return;
+        if (progress < duration) progress++;
+        const percent = (progress / duration) * 100;
+        progressBar.style.width = `${percent}%`;
+
+        if (progress >= duration) {
+          isPlaying = false;
+          setPlayIcon();
+        }
+      }
+
+      function updateInfo(track, artist) {
+        trackElem.textContent = track || "Track Name";
+        artistElem.textContent = artist || "Artist Name";
+        isPlaying = true;
+        setPlayIcon();
+      }
+
+      function resetPlayer() {
+        lastTrack = "";
+        progress = 0;
+        isPlaying = false;
+        updateInfo("", "");
+        progressBar.style.width = "0%";
+        setPlayIcon();
+      }
+
+      function fetchSnipData() {
+        fetch("../Snip.txt")
+          .then((res) => res.text())
+          .then((data) => {
+            const line = data.trim();
+            if (!line) {
+              resetPlayer();
+              return;
+            }
+
+            const match = line.match(/“(.+?)”\s*―\s*(.+?)(?:,\s*(.+))?$/);
+            if (!match) {
+              resetPlayer();
+              return;
+            }
+
+            const [_, track, artist] = match;
+
+            if (track !== lastTrack) {
+              progress = 0;
+              lastTrack = track;
+              updateInfo(track, artist);
+              coverImg.src = coverUrl;
+              coverImg.onload = applyGradientFromArtwork;
+            }
+          })
+          .catch((err) => {
+            console.error("Error reading Snip.txt:", err);
+            resetPlayer();
+          });
+      }
+
+      function applyGradientFromArtwork() {
+        if (!coverImg.complete || coverImg.naturalWidth === 0) return;
+
+        try {
+          const dominant = colorThief.getColor(coverImg);
+          const pastel = pastelize(dominant);
+          const bright = brighten(dominant, 0.4);
+          const gradient = `linear-gradient(90deg, rgb(${pastel.join(
+            ","
+          )}), rgb(${bright.join(",")}))`;
+          widgetElem.style.background = gradient;
+          progressBar.style.background = gradient;
+        } catch (e) {
+          widgetElem.style.background = "#e7e6f0";
+        }
+      }
+
+      function rgbToHsl(r, g, b) {
+        r /= 255;
+        g /= 255;
+        b /= 255;
+        const max = Math.max(r, g, b),
+          min = Math.min(r, g, b);
+        let h,
+          s,
+          l = (max + min) / 2;
+        if (max === min) {
+          h = s = 0;
+        } else {
+          const d = max - min;
+          s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+          switch (max) {
+            case r:
+              h = (g - b) / d + (g < b ? 6 : 0);
+              break;
+            case g:
+              h = (b - r) / d + 2;
+              break;
+            case b:
+              h = (r - g) / d + 4;
+              break;
+          }
+          h /= 6;
+        }
+        return [h * 360, s, l];
+      }
+
+      function hslToRgb(h, s, l) {
+        h /= 360;
+        let r, g, b;
+        if (s === 0) r = g = b = l;
+        else {
+          const hue2rgb = (p, q, t) => {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            return p;
+          };
+          const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+          const p = 2 * l - q;
+          r = hue2rgb(p, q, h + 1 / 3);
+          g = hue2rgb(p, q, h);
+          b = hue2rgb(p, q, h - 1 / 3);
+        }
+        return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+      }
+
+      function pastelize(rgb) {
+        let [h, s, l] = rgbToHsl(...rgb);
+        s = 0.3;
+        l = 0.85;
+        return hslToRgb(h, s, l);
+      }
+
+      function brighten(rgb, amount = 0.3) {
+        let [h, s, l] = rgbToHsl(...rgb);
+        l = Math.min(1, l + amount);
+        return hslToRgb(h, s, l);
+      }
+
+      setPlayIcon(); // initial icon
+      setInterval(fetchSnipData, 2000);
+      setInterval(updateProgress, 1000);
+    </script>
+  </body>
+</html>

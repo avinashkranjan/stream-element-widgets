@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
+  <title>Spotify Now Playing</title>
+</head>
+
+<body>
+  <div class="widget">
+    <div class="info">
+      <h1 id="track">Track Name</h1>
+      <p id="artist">Artist Name</p>
+    </div>
+    <div class="controls">
+      <span id="play-icon">▶</span>
+      <span id="current-time">0:00</span>
+      <div class="progress-wrapper">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <span id="total-time">0:00</span>
+    </div>
+    <img id="cover" src="" alt="Album Cover" class="cover" crossorigin="anonymous" />
+  </div>
+
+  <script>
+    const trackElem = document.getElementById("track");
+    const artistElem = document.getElementById("artist");
+    const progressBarElem = document.getElementById("progress-bar");
+    const currentTimeElem = document.getElementById("current-time");
+    const totalTimeElem = document.getElementById("total-time");
+    const playIconElem = document.getElementById("play-icon");
+    const coverImg = document.getElementById("cover");
+
+    const accessToken = "BQCAY3lEORjm1w7LcNCTmOUg40tiXuiv29g9s30_dS1JCT0dmLDyq2zYCU0U3LT8f9EuC0RE9bk4pKakXCDNZQ7LQ6t5s04hf4l-UqyQAdnyt1WOPCYB_6N6qwfgcas_dDz_3OkiwNfQswFEpMqnJn5jXAAIRc8IQnYerEWWsmG2p_WwyxWNGxyipybpLtZ_pJBUfO3cEcVQzYfNZR0g60O5Fy_eOWnIZ07NHENDA2SwaC8";
+
+    function formatTime(ms) {
+      const seconds = Math.floor(ms / 1000);
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return `${m}:${s.toString().padStart(2, "0")}`;
+    }
+
+    function pastelize(rgb) {
+      const [h, s, l] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+      return hslToRgb(h, 0.3, 0.85);
+    }
+
+    function brighten(rgb, amount = 0.4) {
+      const [h, s, l] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+      return hslToRgb(h, s, Math.min(1, l + amount));
+    }
+
+    function rgbToHsl(r, g, b) {
+      r /= 255;
+      g /= 255;
+      b /= 255;
+      const max = Math.max(r, g, b),
+        min = Math.min(r, g, b);
+      let h, s, l = (max + min) / 2;
+      if (max === min) {
+        h = s = 0;
+      } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r:
+            h = (g - b) / d + (g < b ? 6 : 0);
+            break;
+          case g:
+            h = (b - r) / d + 2;
+            break;
+          case b:
+            h = (r - g) / d + 4;
+            break;
+        }
+        h /= 6;
+      }
+      return [h * 360, s, l];
+    }
+
+    function hslToRgb(h, s, l) {
+      h /= 360;
+      const hue2rgb = (p, q, t) => {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1 / 6) return p + (q - p) * 6 * t;
+        if (t < 1 / 2) return q;
+        if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+        return p;
+      };
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
+      const r = hue2rgb(p, q, h + 1 / 3);
+      const g = hue2rgb(p, q, h);
+      const b = hue2rgb(p, q, h - 1 / 3);
+      return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+    }
+
+    function setPlayerGradient() {
+      const playerElem = document.querySelector(".widget");
+      if (!window.ColorThief || !coverImg.complete) return;
+      try {
+        const colorThief = new ColorThief();
+        if (coverImg.naturalWidth && coverImg.naturalHeight) {
+          const dominant = colorThief.getColor(coverImg);
+          const light = pastelize(dominant);
+          const accent = brighten(dominant, 0.4);
+          const gradient = `linear-gradient(90deg, rgb(${light.join(",")}), rgb(${accent.join(",")}))`;
+          playerElem.style.background = gradient;
+          progressBarElem.style.background = gradient;
+        }
+      } catch (e) {
+        console.error("ColorThief failed", e);
+      }
+    }
+
+    coverImg.addEventListener("load", setPlayerGradient);
+
+    async function fetchNowPlaying() {
+      try {
+        const res = await fetch("https://api.spotify.com/v1/me/player/currently-playing", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        });
+
+        if (res.status === 204 || res.status > 400) return;
+
+        const data = await res.json();
+        const {
+          item,
+          is_playing,
+          progress_ms
+        } = data;
+        const track = item.name;
+        const artist = item.artists.map(a => a.name).join(", ");
+        const albumImage = item.album.images[0].url;
+        const duration = item.duration_ms;
+
+        trackElem.textContent = track;
+        artistElem.textContent = artist;
+        coverImg.src = albumImage;
+        playIconElem.textContent = is_playing ? "⏸" : "▶";
+        currentTimeElem.textContent = formatTime(progress_ms);
+        totalTimeElem.textContent = formatTime(duration);
+        const progressPercent = (progress_ms / duration) * 100;
+        progressBarElem.style.width = `${progressPercent}%`;
+      } catch (err) {
+        console.error("Spotify API error:", err);
+      }
+    }
+
+    setInterval(fetchNowPlaying, 3000);
+  </script>
+</body>
+
+</html>
+<!-- 
+https://b92425ec84fe.ngrok-free.app/success.html?access_token=BQCAY3lEORjm1w7LcNCTmOUg40tiXuiv29g9s30_dS1JCT0dmLDyq2zYCU0U3LT8f9EuC0RE9bk4pKakXCDNZQ7LQ6t5s04hf4l-UqyQAdnyt1WOPCYB_6N6qwfgcas_dDz_3OkiwNfQswFEpMqnJn5jXAAIRc8IQnYerEWWsmG2p_WwyxWNGxyipybpLtZ_pJBUfO3cEcVQzYfNZR0g60O5Fy_eOWnIZ07NHENDA2SwaC8
+&refresh_token=AQACPVmfXDB6m1sQHm9ZXZ_3P6zX_mbGj811dOmpYdRdQOwFT-LtxLIU0qkWHLDfMkJ0Szx4jy5uKQtJ9IMDwscoGIYpn1xTU9WKEIitf2DVbiwDTKG3XVHBATWFgXzT-hA -->
