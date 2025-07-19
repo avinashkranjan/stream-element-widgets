@@ -72,8 +72,8 @@ export default function Widget() {
   const renderByType = () => {
     if (error) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1e1e2f] to-[#121212] font-sans px-4">
-          <div className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-xl px-8 py-10 max-w-sm text-center">
+        <div className="m-5 h-auto max-w-md">
+          <div className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-xl px-8 py-10  text-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-8 w-8 mx-auto mb-2 text-red-400"
@@ -206,9 +206,5 @@ export default function Widget() {
     }
   };
 
-  return (
-    <div className="rounded-lg overflow-hidden" style={{ backgroundColor: bg }}>
-      {renderByType()}
-    </div>
-  );
+  return <div className="rounded-lg overflow-hidden">{renderByType()}</div>;
 }
