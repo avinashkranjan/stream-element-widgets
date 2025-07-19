@@ -13,6 +13,7 @@ export default function Widget() {
   const params = useParams();
   const { id } = params;
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
   const [data, setData] = useState<any>(null);
   const [type, setType] = useState<
@@ -29,8 +30,15 @@ export default function Widget() {
   }, [id, router]);
 
   const fetchMeta = async () => {
-    const meta = await fetch(`/api/widget/meta?id=${id}`).then((r) => r.json());
-    setType(meta.type);
+    try {
+      const meta = await fetch(`/api/widget/meta?id=${id}`).then((r) =>
+        r.json()
+      );
+      setType(meta.type);
+    } catch (err) {
+      console.error("Error fetching widget meta:", err);
+      setError("Failed to load widget metadata. Please try again.");
+    }
   };
 
   const fetchNow = async () => {
@@ -47,6 +55,8 @@ export default function Widget() {
     } catch (err) {
       console.error("Error fetching now playing:", err);
       setError("Something went wrong while fetching your Spotify data.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -70,9 +80,16 @@ export default function Widget() {
   }, [data]);
 
   const renderByType = () => {
+    if (loading)
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1e1e2f] to-[#121212]">
+          <div className="w-12 h-12 border-4 border-white border-dashed rounded-full animate-spin"></div>
+        </div>
+      );
+
     if (error) {
       return (
-        <div className="m-5 h-auto max-w-md">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1e1e2f] to-[#121212] font-sans px-4">
           <div className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-xl px-8 py-10  text-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -120,18 +137,12 @@ export default function Widget() {
               />
             </svg>
             <h2 className="text-white text-xl font-semibold mb-2">
-              No Data Available
+              Nothing Playing Right Now
             </h2>
             <p className="text-gray-400 text-sm">
-              We're not receiving any data at the moment. Please try again later
-              or check your connection.
+              We couldn’t detect any music. Start playing a song on Spotify to
+              see it appear here.
             </p>
-            <button
-              onClick={() => router.push("/create")}
-              className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded transition mt-4 cursor-pointer"
-            >
-              Go to Create Page
-            </button>
           </div>
         </div>
       );
