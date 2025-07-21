@@ -57,26 +57,26 @@ function hslToRgb(h: number, s: number, l: number): [number, number, number] {
 }
 
 /**
- * Light pastel from RGB
+ * Create a brighter pastel-like color from RGB
  */
 function pastelize(rgb: [number, number, number]): [number, number, number] {
   const [h, _s, _l] = rgbToHsl(...rgb);
-  return hslToRgb(h, 0.3, 0.85);
+  return hslToRgb(h, 0.45, 0.88); // more saturation, higher lightness
 }
 
 /**
- * Brighten RGB
+ * Brighten RGB color
  */
 function brighten(
   rgb: [number, number, number],
-  amount = 0.4
+  amount = 0.5
 ): [number, number, number] {
   const [h, s, l] = rgbToHsl(...rgb);
-  return hslToRgb(h, s, Math.min(1, l + amount));
+  return hslToRgb(h, Math.min(1, s + 0.2), Math.min(1, l + amount)); // brighten + slight saturation boost
 }
 
 /**
- * Given an image URL, returns background & progress bar colors
+ * Extract and return improved background and progress bar colors
  */
 export async function getGradientColorsFromImage(imageUrl: string): Promise<{
   backgroundColor: string;
@@ -85,14 +85,14 @@ export async function getGradientColorsFromImage(imageUrl: string): Promise<{
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = "Anonymous";
-    img.src = imageUrl + "?" + Date.now(); // bust cache
+    img.src = imageUrl + "?" + Date.now(); // cache busting
 
     img.onload = () => {
       try {
         const colorThief = new ColorThief();
         const dominant = colorThief.getColor(img) as [number, number, number];
         const bgColor = pastelize(dominant);
-        const progressColor = brighten(dominant, 0.4);
+        const progressColor = brighten(dominant, 0.7);
 
         resolve({
           backgroundColor: `rgb(${bgColor.join(",")})`,
