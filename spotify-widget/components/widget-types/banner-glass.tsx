@@ -115,7 +115,7 @@ const BannerGlassWidget = ({
             </span>
 
             {/* Progress Bar */}
-            <div className="flex-1 h-1.5 bg-gray-300 mx-1.5 rounded-sm overflow-hidden">
+            <div className="flex-1 h-1.5 bg-black/30 mx-1.5 rounded-sm overflow-hidden">
               <div
                 className={`h-full transition-all duration-300 ease-out bg-gradient-to-r`}
                 style={{

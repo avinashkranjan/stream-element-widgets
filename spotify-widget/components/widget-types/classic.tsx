@@ -111,7 +111,7 @@ const ClassicWidget: React.FC<ClassicWidgetProps> = ({
           </div>
 
           {/* Progress Bar */}
-          <div className="mt-2 bg-gray-100 bg-opacity-60 rounded h-1.5 w-full overflow-hidden">
+          <div className="mt-2 bg-black/30 bg-opacity-60 rounded h-1.5 w-full overflow-hidden">
             <div
               className={`h-full transition-all duration-700 ease-out bg-gradient-to-r`}
               style={{

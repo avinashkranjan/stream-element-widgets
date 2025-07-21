@@ -93,7 +93,7 @@ const BannerWidget = ({
           </span>
 
           {/* Progress Bar */}
-          <div className="flex-1 h-1.5 bg-white/30 rounded-full overflow-hidden mx-2">
+          <div className="flex-1 h-1.5 bg-black/30 rounded-full overflow-hidden mx-2">
             <div
               className={`h-full bg-gradient-to-r transition-all duration-500 ease-out rounded-full`}
               style={{

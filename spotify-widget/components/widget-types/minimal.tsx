@@ -66,7 +66,7 @@ const MinimalWidget = ({
         </div>
 
         {/* Progress Container */}
-        <div className="relative w-30 h-1.5 bg-gray-300 rounded-full overflow-hidden">
+        <div className="relative w-30 h-1.5 bg-black/30 rounded-full overflow-hidden">
           <div
             className={`absolute h-full bg-gradient-to-r  transition-all duration-700 ease-out rounded-full`}
             style={{

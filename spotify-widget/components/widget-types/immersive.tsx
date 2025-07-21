@@ -69,7 +69,7 @@ const ImmersiveWidget = ({
             <span>{formatTime(currentTime)}</span>
             <span>{formatTime(duration)}</span>
           </div>
-          <div className="relative w-full h-2 bg-white/30 rounded-full overflow-hidden">
+          <div className="relative w-full h-2 bg-black/30 rounded-full overflow-hidden">
             {/* Progress Fill */}
             <motion.div
               className="absolute left-0 top-0 h-full rounded-full"
