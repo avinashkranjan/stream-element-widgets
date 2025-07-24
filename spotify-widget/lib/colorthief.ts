@@ -141,20 +141,22 @@ function getDomainColor(
 ): [number, number, number] {
   const [h, s, l] = rgbToHsl(...dominantRgb);
 
+  // Create a copy of the palette to avoid mutating the original
+  const paletteCopy = [...palette];
+
+  // Sort the palette by lightness
+  paletteCopy.sort((a, b) => {
+    const [hA, sA, lA] = rgbToHsl(...a);
+    const [hB, sB, lB] = rgbToHsl(...b);
+    return lA - lB;
+  });
+
   if (l < 0.5) {
-    // Find lightest color in palette
-    return palette.reduce((lightest, color) => {
-      const [colorH, colorS, colorL] = rgbToHsl(...color);
-      const [lightestH, lightestS, lightestL] = rgbToHsl(...lightest);
-      return colorL > lightestL ? color : lightest;
-    });
+    // If dominant is dark, return the lightest color (last in sorted array)
+    return paletteCopy[paletteCopy.length - 1];
   } else {
-    // Find darkest color in palette
-    return palette.reduce((darkest, color) => {
-      const [colorH, colorS, colorL] = rgbToHsl(...color);
-      const [darkestH, darkestS, darkestL] = rgbToHsl(...darkest);
-      return colorL < darkestL ? color : darkest;
-    });
+    // If dominant is light, return the darkest color (first in sorted array)
+    return paletteCopy[0];
   }
 }
 
@@ -189,6 +191,7 @@ export async function getGradientColorsFromImage(imageUrl: string): Promise<{
 
         const backgroundColor = createGradient(dominantColor);
         const domainColor = getDomainColor(dominantColor, palette);
+        console.log("Domain Color:", domainColor);
         const progressColor = createGradient(domainColor);
 
         resolve({
