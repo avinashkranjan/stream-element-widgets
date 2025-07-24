@@ -188,12 +188,12 @@ export async function getGradientColorsFromImage(imageUrl: string): Promise<{
         const dominantColor = palette[0];
 
         const backgroundColor = createGradient(dominantColor);
-        const progressColor = getProgressColor(dominantColor, palette);
         const domainColor = getDomainColor(dominantColor, palette);
+        const progressColor = createGradient(domainColor);
 
         resolve({
           backgroundColor,
-          progressColor: `rgb(${progressColor.join(",")})`,
+          progressColor,
           domainColor: `rgb(${domainColor.join(",")})`,
         });
       } catch (err) {
