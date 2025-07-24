@@ -12,6 +12,7 @@ const MinimalWidget = ({
   const [colors, setColors] = useState({
     backgroundColor: "#eee",
     progressColor: "#aaa",
+    domainColor: "#fff",
   });
 
   useEffect(() => {
@@ -61,7 +62,7 @@ const MinimalWidget = ({
         style={{ backgroundImage: colors.backgroundColor }}
       >
         {/* Play/Pause Icon */}
-        <div className="text-gray-700">
+        <div style={{ color: colors.domainColor }}>
           {isPlaying ? <PauseIcon /> : <PlayIcon />}
         </div>
 
@@ -77,7 +78,10 @@ const MinimalWidget = ({
         </div>
 
         {/* Track Info */}
-        <div className="flex items-center gap-1.5 text-sm text-gray-700 whitespace-nowrap">
+        <div
+          className="flex items-center gap-1.5 text-sm whitespace-nowrap"
+          style={{ color: colors.domainColor }}
+        >
           <span className="text-lg font-semibold">⋮</span>
           <span className="font-semibold">{trackName}</span>
           <span className="opacity-40">|</span>

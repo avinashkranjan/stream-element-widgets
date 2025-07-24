@@ -22,6 +22,7 @@ const ClassicWidget: React.FC<ClassicWidgetProps> = ({
   const [colors, setColors] = useState({
     backgroundColor: "#eee",
     progressColor: "#aaa",
+    domainColor: "#fff",
   });
 
   useEffect(() => {
@@ -94,18 +95,24 @@ const ClassicWidget: React.FC<ClassicWidgetProps> = ({
         </div>
 
         {/* Play/Pause Button */}
-        <div className="text-gray-700">
+        <div style={{ color: colors.domainColor }}>
           {isPlaying ? <PauseIcon /> : <PlayIcon />}
         </div>
 
         {/* Track Info */}
         <div className="flex flex-col justify-center min-w-[200px]">
-          <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
-            <span className="font-semibold truncate max-w-[120px]">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <span
+              className="font-semibold truncate max-w-[120px]"
+              style={{ color: colors.domainColor }}
+            >
               {trackName}
             </span>
-            <span className="text-gray-900">•</span>
-            <span className="opacity-80 truncate max-w-[120px]">
+            <span style={{ color: colors.domainColor }}>•</span>
+            <span
+              className="opacity-80 truncate max-w-[120px]"
+              style={{ color: colors.domainColor }}
+            >
               {artistName}
             </span>
           </div>
