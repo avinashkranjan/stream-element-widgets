@@ -67,8 +67,8 @@ const ClassicWidget: React.FC<ClassicWidgetProps> = ({
       } flex justify-center items-center  bg-transparent font-sans`}
     >
       <div
-        className={`flex items-center rounded-xl pr-8 gap-3 text-gray-800 shadow-lg bg-gradient-to-r`}
-        style={{ background: colors.backgroundColor }}
+        className="flex items-center rounded-xl pr-8 gap-3 text-gray-800 shadow-lg"
+        style={{ backgroundImage: colors.backgroundColor }}
       >
         {/* Album Cover */}
         <div className="relative w-18 h-18">
@@ -113,7 +113,7 @@ const ClassicWidget: React.FC<ClassicWidgetProps> = ({
           {/* Progress Bar */}
           <div className="mt-2 bg-black/30 bg-opacity-60 rounded h-1.5 w-full overflow-hidden">
             <div
-              className={`h-full transition-all duration-700 ease-out bg-gradient-to-r`}
+              className={`h-full transition-all duration-700 ease-out`}
               style={{
                 width: `${Math.min(100, Math.max(0, progress))}%`,
                 background: colors.progressColor,

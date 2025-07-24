@@ -10,7 +10,7 @@ const PREVIEW_DATA = {
     album: {
       images: [
         {
-          url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRneCLGDb0dzQc-ufX9ELgDNzbvYaBGA7oAyw&s",
+          url: "https://d1csarkz8obe9u.cloudfront.net/posterpreviews/artistic-album-cover-design-template-d12ef0296af80b58363dc0deef077ecc_screen.jpg",
         },
       ],
     },
@@ -38,8 +38,8 @@ const WidgetPreview = ({ type }: { type: string }) => {
     type as
       | string
       | "classic"
-      | "banner"
-      | "banner-glass"
+      // | "banner"
+      // | "banner-glass"
       | "minimal"
       | "immersive"
   ) {
@@ -65,32 +65,32 @@ const WidgetPreview = ({ type }: { type: string }) => {
           coverImage={item.album.images[0].url}
         />
       );
-    case "banner":
-      return (
-        <BannerWidget
-          trackName={item.name}
-          artistName={artist?.split(",")[0]}
-          isPlaying={true}
-          isPreview={true}
-          progress={65}
-          coverImage={item.album.images[0].url}
-          duration={dur}
-          currentTime={progress_ms}
-        />
-      );
-    case "banner-glass":
-      return (
-        <BannerGlassWidget
-          trackName={item.name}
-          artistName={artist?.split(",")[0]}
-          isPlaying={true}
-          isPreview={true}
-          progress={65}
-          coverImage={item.album.images[0].url}
-          duration={dur}
-          currentTime={progress_ms}
-        />
-      );
+    // case "banner":
+    //   return (
+    //     <BannerWidget
+    //       trackName={item.name}
+    //       artistName={artist?.split(",")[0]}
+    //       isPlaying={true}
+    //       isPreview={true}
+    //       progress={65}
+    //       coverImage={item.album.images[0].url}
+    //       duration={dur}
+    //       currentTime={progress_ms}
+    //     />
+    //   );
+    // case "banner-glass":
+    //   return (
+    //     <BannerGlassWidget
+    //       trackName={item.name}
+    //       artistName={artist?.split(",")[0]}
+    //       isPlaying={true}
+    //       isPreview={true}
+    //       progress={65}
+    //       coverImage={item.album.images[0].url}
+    //       duration={dur}
+    //       currentTime={progress_ms}
+    //     />
+    //   );
     case "immersive":
       return (
         <ImmersiveWidget

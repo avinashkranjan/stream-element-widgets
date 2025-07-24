@@ -7,8 +7,8 @@ import WidgetPreview from "@/components/widget-preview";
 const TYPES = [
   { id: "minimal", name: "Minimal" },
   { id: "classic", name: "Classic" },
-  { id: "banner", name: "Banner" },
-  { id: "banner-glass", name: "Banner Glass" },
+  // { id: "banner", name: "Banner" },
+  // { id: "banner-glass", name: "Banner Glass" },
   { id: "immersive", name: "Immersive" },
 ];
 
@@ -49,7 +49,7 @@ export default function CreatePage() {
         </h1>
 
         {/* Widget Type Selector */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
           {TYPES.map((t) => (
             <button
               key={t.id}

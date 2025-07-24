@@ -7,7 +7,7 @@ const ImmersiveWidget = ({
   artistName = "Artist Name",
   isPlaying = false,
   isPreview = false,
-  coverImage = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGh5WFH8TOIfRKxUrIgJZoDCs1yvQ4hIcppw&s",
+  coverImage = "",
   currentTime = 0,
   duration = 220000,
 }) => {
@@ -15,14 +15,21 @@ const ImmersiveWidget = ({
   const [colors, setColors] = useState({
     backgroundColor: "#eee",
     progressColor: "#aaa",
+    domainColor: "#fff",
   });
 
   useEffect(() => {
     getGradientColorsFromImage(coverImage)
       .then((result) => {
+        const match = result.backgroundColor.match(/rgb\([^)]+\)/);
+        const primaryColor = match ? match[0] : "rgb(97,30,32)";
+
+        const updatedBackgroundImage = `linear-gradient(to top, ${primaryColor}, transparent)`;
+
         setColors({
-          backgroundColor: `linear-gradient(to top, ${result.backgroundColor}, transparent)`,
+          backgroundColor: updatedBackgroundImage,
           progressColor: result.progressColor,
+          domainColor: result.domainColor,
         });
       })
       .catch(console.error);
@@ -60,12 +67,19 @@ const ImmersiveWidget = ({
         </div>
         {/* Gradient Overlay */}
         <div
-          className="absolute bottom-0 w-full h-1/2 bg-gradient-to-t opacity-90 z-10"
-          style={{ background: colors.backgroundColor }}
+          className="absolute bottom-0 w-full h-1/2 opacity-90 z-10"
+          style={{
+            backgroundImage: colors.backgroundColor,
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "cover",
+          }}
         />
         {/* Straight Progress Bar */}
         <div className="absolute bottom-6 left-5 right-5 z-30">
-          <div className="flex justify-between text-xs text-yellow-300 font-semibold drop-shadow-lg mb-1">
+          <div
+            className="flex justify-between text-xs font-semibold drop-shadow-lg mb-1"
+            style={{ color: colors.domainColor }}
+          >
             <span>{formatTime(currentTime)}</span>
             <span>{formatTime(duration)}</span>
           </div>
@@ -85,17 +99,29 @@ const ImmersiveWidget = ({
           <div className="text-lg font-bold text-white drop-shadow-lg truncate">
             {trackName}
           </div>
-          <div className="text-sm text-yellow-300 opacity-90 drop-shadow-lg truncate flex items-center justify-center gap-2 mt-1">
+          <div
+            className="text-sm opacity-90 drop-shadow-lg font-semibold truncate flex items-center justify-center gap-2 mt-1"
+            style={{ color: colors.domainColor }}
+          >
             {isPlaying && (
               <div className="flex gap-1">
-                <div className="w-1 h-3 bg-yellow-300 rounded-full animate-pulse" />
                 <div
-                  className="w-1 h-3 bg-yellow-300 rounded-full animate-pulse"
-                  style={{ animationDelay: "0.2s" }}
+                  className="w-1 h-3 rounded-full animate-pulse"
+                  style={{ background: colors.domainColor }}
                 />
                 <div
-                  className="w-1 h-3 bg-yellow-300 rounded-full animate-pulse"
-                  style={{ animationDelay: "0.4s" }}
+                  className="w-1 h-3  rounded-full animate-pulse"
+                  style={{
+                    animationDelay: "0.2s",
+                    background: colors.domainColor,
+                  }}
+                />
+                <div
+                  className="w-1 h-3 rounded-full animate-pulse"
+                  style={{
+                    animationDelay: "0.4s",
+                    background: colors.domainColor,
+                  }}
                 />
               </div>
             )}

@@ -57,8 +57,8 @@ const MinimalWidget = ({
       } flex justify-center items-center  bg-transparent font-sans`}
     >
       <div
-        className={`flex items-center bg-gradient-to-r rounded-3xl px-5 py-2.5 gap-3 shadow-lg`}
-        style={{ background: colors.backgroundColor }}
+        className={`flex items-center rounded-3xl px-5 py-2.5 gap-3 shadow-lg`}
+        style={{ backgroundImage: colors.backgroundColor }}
       >
         {/* Play/Pause Icon */}
         <div className="text-gray-700">
